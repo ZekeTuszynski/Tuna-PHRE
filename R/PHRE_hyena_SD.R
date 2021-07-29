@@ -21,7 +21,8 @@ library(sf)
 library(tidyverse)
 library(magrittr)
 library(rgdal)
-machine <- "/home/simon/Documents/Si Work/" #Aquarius
+# machine <- "/home/simon/Documents/Si Work/" #Aquarius
+
 # AllDailies <- readRDS(paste0(machine, "Blocklab/abft_diving/All_Daily/AllDailies_HIFSDA_Stocknames.Rds"))
 # maploadloc = "/home/simon/Dropbox/Blocklab Monterey/Data/" #ensure trailing /slash
 # GSL <- st_read(paste0(maploadloc, "Maps/GulfOfStLawrence/GulfOfStLawrence.gpkg"))
@@ -44,7 +45,7 @@ machine <- "/home/simon/Documents/Si Work/" #Aquarius
 #          dsn = "/home/simon/Dropbox/Blocklab Monterey/Data/Maps/GulfOfStLawrence/tempdir.gpkg",
 #          layer = "locs.utm",
 #          driver = "GPKG")
-locs.utm <- readOGR("/home/simon/Dropbox/Blocklab Monterey/Data/Maps/GulfOfStLawrence/tempdir.gpkg")
+locs.utm <- readOGR("./data/tempdir.gpkg")
 
 # bbox(locs.utm)
 # min      max
@@ -55,7 +56,7 @@ locs.utm <- readOGR("/home/simon/Dropbox/Blocklab Monterey/Data/Maps/GulfOfStLaw
 # out.fence.utm <- rgdal::readOGR(dsn = "C:/Users/max/Desktop/Tarjan/hyena_data/Fences/Fences", layer = "outside_fences_utm2")
 
 # get high quality coastline map shape
-natlantic <- read_sf(paste0(machine, "Blocklab/iccat_SSM_data/outputs/CroppedMap/Crop_Map.shp")) # HQ enough??
+natlantic <- read_sf("./data/Crop_Map.shp") # HQ enough??
 # natlantic <- st_crop(natlantic,
 #                      xmin = -98,
 #                      ymin = 8,
@@ -66,7 +67,9 @@ natlantic <- st_crop(natlantic, # GSL only
                      ymin = 45,
                      xmax = -55,
                      ymax = 52)
-
+# Error in s2_geography_from_wkb(x, oriented = oriented, check = check) :
+#   Evaluation error: Found 1 feature with invalid spherical geometry.
+# [441] Loop 0 is not valid: Edge 9754 has duplicate vertex with edge 9759.
 
 # convert coast to raster ####
 library(stars)
