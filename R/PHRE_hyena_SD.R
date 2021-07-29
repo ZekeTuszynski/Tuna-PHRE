@@ -153,6 +153,7 @@ rasters[[2]][] <- rasterToPoints(habitat)[, 2]
 rm(habitat, dd) ## remove habitat from workspace to save space
 
 # run PHRE ####
+source("./R/phre_function.R")
 ## apply phre function
 HR <- phre(locs = locs.utm@coords,
            rast = rasters,
