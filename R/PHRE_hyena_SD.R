@@ -2,6 +2,8 @@
 ## Prepared by M Tarjan
 ## June 11, 2019
 
+# what kind of a change is this?!
+
 ## INPUTS
 ## locs: dataframe with colnames x & y
 ## rast: raster with 1 or more layers
