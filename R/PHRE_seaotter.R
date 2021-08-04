@@ -5,11 +5,10 @@
 ##SD notes 2020.06.24:
 # In first code block, data becomes a subset of grid, meaning zero data from 'data' remain
 # Per paper: this is only viable because otters follow the coastline thus can be transformed to a 2D coastline-following reprojection
-# This won't work for tuna.
+# This won't work for tuna. Why not?
 
 ## load data; specify file paths to supporting information
-# data <- read.csv("F4_994_1346.csv")
-data <- read.csv("/home/simon/Dropbox/Galway/Analysis/R/Tarjan&Tinker.2016/mtarjan_PHRE_github/F4_994_1346.csv")
+data <- read.csv("./data/F4_994_1346.csv")
 # data <- cbind(data$Xcoord, data$Ycoord)
 data <- cbind(data$TealeX, data$TealeY)
 # grid <- read.csv("C:/Users/max/Downloads/journal.pone.0150547.s009.csv")
