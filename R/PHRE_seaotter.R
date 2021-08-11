@@ -12,12 +12,16 @@ data <- read.csv("./data/F4_994_1346.csv")
 # data <- cbind(data$Xcoord, data$Ycoord)
 data <- cbind(data$TealeX, data$TealeY)
 # grid <- read.csv("C:/Users/max/Downloads/journal.pone.0150547.s009.csv")
-grid <- read.csv("/home/simon/Dropbox/Galway/Analysis/R/Tarjan&Tinker.2016/Tarjan&Tinker.2016.Data.csv")
+grid <- read.csv("./data/Tarjan&Tinker.2016.Data.csv")
 data <- subset(grid, TealeY <= 160000 & TealeY > -180000, select = c("TealeX", "TealeY"))
 data <- data[sample(x = 1:nrow(data), size = 200), ] ## create random points in range of grid for locations
 
 ## create list of rasters from the grid array
 library(raster)
+library(maptools)
+library(ks)
+library(spex)
+library(rgeos)
 rasters <- list(0)
 rasters[[1]] <- rasterFromXYZ(cbind(grid$TealeX, grid$TealeY, grid$ATOScal))
 rasters[[2]] <- rasterFromXYZ(cbind(grid$TealeX, grid$TealeY, log(grid$Distance + 0.01)))
@@ -37,8 +41,7 @@ smoother <- cbind(c(1, 0), c(0, 0.3)) # (ATOS, 0) (0, log(dist))
 # smoother[1,1]<-smoother[1,1]*2*(mean.nn/4)^2.5
 
 ## load the phre function
-source("phre_function.R")
-source("/home/simon/Dropbox/Galway/Analysis/R/Tarjan&Tinker.2016/mtarjan_PHRE_github/phre_function.R")
+source("./R/phre_function.R")
 ## apply phre function
 HR <- phre(locs = data, rast = rasters, smooth = smoother, percent = 90)
 
@@ -46,5 +49,16 @@ HR <- phre(locs = data, rast = rasters, smooth = smoother, percent = 90)
 ## zoomed in on polygons
 plot(HR$Poly)
 plot(HR$array, add = T)
+#predictive surface: predicted otter abundance
 plot(HR$Polygon, col = "transparent", border = "red", add = T)
+#same as line 50 Polygon == poly
 points(HR$locs, pch = 20, cex = .1, col = "black")
+#actual otter sightings
+
+
+
+#add coastline next
+#x and y axes
+# bathymetry possibly
+# legend title
+# move everything into ggplot

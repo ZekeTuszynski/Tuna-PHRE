@@ -11,6 +11,7 @@
 ## requires that packages are installed: raster, ks, amap, maptools
 ## run all code in this file and then apply function to arguments
 
+
 phre <- function(locs, rast, smooth, percent, resolution) { # phre is a function that uses these arguments
   library(raster) # required for rast conversion & extract
   library(ks) # required for kde
