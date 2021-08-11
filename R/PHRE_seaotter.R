@@ -62,3 +62,4 @@ points(HR$locs, pch = 20, cex = .1, col = "black")
 # bathymetry possibly
 # legend title
 # move everything into ggplot
+# SD to get hammerhead data & coast data
