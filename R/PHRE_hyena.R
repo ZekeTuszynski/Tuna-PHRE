@@ -28,6 +28,7 @@ out.fence.utm <- rgdal::readOGR(dsn = "C:/Users/max/Desktop/Tarjan/hyena_data/Fe
 raster::crs(fence)
 fence.utm <- spTransform(fence, CRSobj = CRS("+init=epsg:32733"))
 out.fence.utm <- spTransform(out.fence.utm, CRSobj = CRS("+init=epsg:32733"))
+# should now be st_transform(fence, crs = CRS("+init=epsg:32733")) owing to updates in the stars, I believe, which is also needed for st_rasterize?
 
 plot(out.fence.utm)
 plot(locs.utm, add = T)
