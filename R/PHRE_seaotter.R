@@ -59,23 +59,34 @@ points(HR$locs, pch = 20, cex = .1, col = "black") #actual otter sightings
 # Generate coastline from data extents ####
 dir.create("./data/coastline")
 # install.packages("gbm.auto")
-coast <- gbm.auto::gbm.basemap(
+# grids example until latlon grids file exists
+gridsexample <- data.frame(lat = c(36, 37), lon = c(-122.27, -121.74))
+
+coast <- gbm.auto::gbm.basemap( # IDK if you need to assign this to coast, think you might be able to just call it
   bounds = c(),
-  grids = NULL, # name your grids database here: lat-lon transformed data powering 'array' above
-  gridslat = NULL, # lat col name in grids
-  gridslon = NULL, # lon colname in grids
+  grids = gridsexample, # name your grids database here: lat-lon transformed data powering 'array' above
+  gridslat = 1, # lat col number in grids
+  gridslon = 2, # lon col number in grids
   getzip = TRUE,
   zipvers = "2.3.7",
   savedir = tempdir(),
-  savename = "./data/coastline/Crop_Map",
+  # savename = "./data/coastline/Crop_Map",
+  savename = "/home/simon/Desktop/Crop_Map",
   res = "CALC",
   extrabounds = TRUE
 )
 
-# then in a normal plot:
-draw.shape(shape = coast, col = landcol) # add coastline
-# or might need to read in crop_map with:
-coast <- st_read(dsn = "./data/coastline/Crop_Map.shp", layer = "Crop_Map", quiet = TRUE) # read in worldmap
+# read in crop_map with:
+coast <- sf::st_read(dsn = "./data/coastline/Crop_Map.shp", layer = "Crop_Map", quiet = TRUE) # read in worldmap
+coast <- sf::st_read(dsn = "/home/simon/Desktop/Crop_Map.shp", layer = "Crop_Map", quiet = TRUE) # read in worldmap
+library(ggplot2)
+library(sf)
+library(ggspatial)
+ggplot2::ggplot() +
+  layer_spatial(coast, fill = "grey", lwd = 0)
+  # or add to existing plot with annotation_spatial() instead
+
+# IDK why crop_map isn't updating, is still north canada. maybe have to delete it each time? overwreite required?
 
 #add coastline next
 #x and y axes
