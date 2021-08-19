@@ -16,6 +16,7 @@ data <- cbind(data$TealeX, data$TealeY) # cbind(data$Xcoord, data$Ycoord)
 grid <- read.csv("./data/Tarjan&Tinker.2016.Data.csv")
 
 
+
 ## create list of rasters from the grid array
 library(raster)
 library(maptools)
@@ -48,14 +49,33 @@ HR <- phre(locs = data, rast = rasters, smooth = smoother, percent = 90)
 ## plot of phre list objects
 ## zoomed in on polygons
 plot(HR$Poly)
-plot(HR$array, add = T)
-#predictive surface: predicted otter abundance
-plot(HR$Polygon, col = "transparent", border = "red", add = T)
-#same as line 50 Polygon == poly
-points(HR$locs, pch = 20, cex = .1, col = "black")
-#actual otter sightings
+plot(HR$array, add = T) #predictive surface: predicted otter abundance
+plot(HR$Polygon, col = "transparent", border = "red", add = T) #same as line 50 Polygon == poly
+points(HR$locs, pch = 20, cex = .1, col = "black") #actual otter sightings
 
 
+
+
+# Generate coastline from data extents ####
+dir.create("./data/coastline")
+# install.packages("gbm.auto")
+coast <- gbm.auto::gbm.basemap(
+  bounds = c(),
+  grids = NULL, # name your grids database here: lat-lon transformed data powering 'array' above
+  gridslat = NULL, # lat col name in grids
+  gridslon = NULL, # lon colname in grids
+  getzip = TRUE,
+  zipvers = "2.3.7",
+  savedir = tempdir(),
+  savename = "./data/coastline/Crop_Map",
+  res = "CALC",
+  extrabounds = TRUE
+)
+
+# then in a normal plot:
+draw.shape(shape = coast, col = landcol) # add coastline
+# or might need to read in crop_map with:
+coast <- st_read(dsn = "./data/coastline/Crop_Map.shp", layer = "Crop_Map", quiet = TRUE) # read in worldmap
 
 #add coastline next
 #x and y axes
