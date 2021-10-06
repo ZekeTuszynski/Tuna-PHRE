@@ -89,9 +89,34 @@ otterarrayll <- sf::st_as_sf(otterarray_df, coords = c("x", "y"), crs = 3311) %>
 sf::st_crs(otterpoly) <- 3311
 otterpolyll <- sf::st_transform(otterpoly[[1]], 4326)
 
+
+
+#Defines function sfc_as_cols for splitting geometry column of otterarrayll into x and y columns.
+
+sfc_as_cols <- function(x, geometry, names = c("x","y")) {
+  if (missing(geometry)) {
+    geometry <- sf::st_geometry(x)
+  } else {
+    geometry <- rlang::eval_tidy(enquo(geometry), x)
+  }
+  stopifnot(inherits(x,"sf") && inherits(geometry,"sfc_POINT"))
+  ret <- sf::st_coordinates(geometry)
+  ret <- tibble::as_tibble(ret)
+  stopifnot(length(names) == ncol(ret))
+  x <- x[ , !names(x) %in% names]
+  ret <- setNames(ret,names)
+  dplyr::bind_cols(x,ret)
+}
+
+
+otterarrayll2 < - sfc_as_cols(otterarrayll, geometry, names = c("x","y"))
+
+
+#Ran into trouble here: error message mentions NA's and unaligned tiles
+
 library(stars)
 ggplot() +
-  geom_raster(data = otterarrayll, aes(fill = layer)) + #x = x, y = y,
+  geom_raster(data = otterarrayll2, aes(x=x, y=y, fill = layer)) + #x = x, y = y,
   #  geom_raster requires the following missing aesthetics: x and y
   scale_fill_viridis_c() +
   geom_point(data = locationsll, aes(colour = "otter locations")) + #x = V1, y = V2,
