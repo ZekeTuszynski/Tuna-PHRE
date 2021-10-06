@@ -8,7 +8,6 @@
 # This won't work for tuna. Why not?
 
 ## load data; specify file paths to supporting information
-<<<<<<< HEAD
 data <- read.csv("./data/F4_994_1346.csv")
 # data <- cbind(data$Xcoord, data$Ycoord)
 data <- cbind(data$TealeX, data$TealeY)
@@ -18,7 +17,6 @@ grid <- read.csv("./data/Tarjan&Tinker.2016.Data.csv")
 #grid is background environmental data (depth, distance, study site coordinates)
 data <- subset(grid, TealeY <= 160000 & TealeY > -180000, select = c("TealeX", "TealeY"))
 data <- data[sample(x = 1:nrow(data), size = 200), ] ## create random points in range of grid for locations
-=======
 data <- read.csv("./data/F4_994_1346.csv") # actual otter data
 data <- cbind(data$TealeX, data$TealeY) # cbind(data$Xcoord, data$Ycoord)
 # or use random points instead of actual data
@@ -26,8 +24,6 @@ data <- cbind(data$TealeX, data$TealeY) # cbind(data$Xcoord, data$Ycoord)
 # data <- data[sample(x = 1:nrow(data), size = 200), ] ## create random points in range of grid for locations
 grid <- read.csv("./data/Tarjan&Tinker.2016.Data.csv")
 
-
->>>>>>> 1c2ec8591b45225e2d47971eabf38345a6319a2c
 
 ## create list of rasters from the grid array
 library(raster)
