@@ -90,8 +90,9 @@ sf::st_crs(otterpoly) <- 3311
 otterpolyll <- sf::st_transform(otterpoly[[1]], 4326)
 
 
+#defines sftc_as_cols function and uses it to split geometry column in otterarrayll
+#into x and y columns
 
-#Defines function sfc_as_cols for splitting geometry column of otterarrayll into x and y columns.
 
 sfc_as_cols <- function(x, geometry, names = c("x","y")) {
   if (missing(geometry)) {
@@ -109,10 +110,10 @@ sfc_as_cols <- function(x, geometry, names = c("x","y")) {
 }
 
 
-otterarrayll2 < - sfc_as_cols(otterarrayll, geometry, names = c("x","y"))
+otterarrayll2 <- sfc_as_cols(otterarrayll, geometry, names = c("x","y"))
 
 
-#Ran into trouble here: error message mentions NA's and unaligned tiles
+
 
 library(stars)
 ggplot() +
