@@ -23,5 +23,5 @@ rasters[[2]]<-rasterFromXYZ(cbind(grid$x, grid$y, log(grid$BankDist+0.01)))
 HR<-phre(locs=data, rast=rasters, smooth='default', percent=90, resolution = 1000)
 
 ##plot of phre list objects
-##zoomed in on polygons
+##zoomed in on polygon
 plot(HR$Poly); plot(HR$array, add=T); plot(HR$Polygon, col="transparent", border='red', add=T); points(HR$locs, pch=20, cex=.1, col="black")
