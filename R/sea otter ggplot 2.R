@@ -64,12 +64,10 @@ summary(otterarray)
 summary(otterarray, maxamp = ncell(otterarray))
 otterarray_df <- as.data.frame(otterarray, xy = TRUE)
 
-
+# plain english notes about what every line is doing
 
 
 otterpoly <- st_as_sf(HR$Polygon)
-
-
 
 
 ggplot() +
@@ -90,58 +88,34 @@ sf::st_crs(otterpoly) <- 3311
 otterpolyll <- sf::st_transform(otterpoly[[1]], 4326)
 
 
-#defines sftc_as_cols function and uses it to split geometry column in otterarrayll
-#into x and y columns
 
+# from here####
+hist(otterarrayll$layer)
+library(tidyverse)
+# Error: package or namespace load failed for ‘tidyverse’ in loadNamespace(j <- i[[1L]], c(lib.loc, .libPaths()), versionCheck = vI[[j]]):
+# there is no package called ‘reprex
+# zeke to fix####
+library(tidylog)
+library(magrittr)
 
-sfc_as_cols <- function(x, geometry, names = c("x","y")) {
-  if (missing(geometry)) {
-    geometry <- sf::st_geometry(x)
-  } else {
-    geometry <- rlang::eval_tidy(enquo(geometry), x)
-  }
-  stopifnot(inherits(x,"sf") && inherits(geometry,"sfc_POINT"))
-  ret <- sf::st_coordinates(geometry)
-  ret <- tibble::as_tibble(ret)
-  stopifnot(length(names) == ncol(ret))
-  x <- x[ , !names(x) %in% names]
-  ret <- setNames(ret,names)
-  dplyr::bind_cols(x,ret)
-}
+tmp <- otterarrayll %>% # start with this object & save changes to it   otterarrayll %<>%
+  drop_na(layer) %>% # remove NAs
+  filter(layer > 0) # remove zeroes
 
+tmp <- otterarrayll[which(!is.na(otterarrayll$layer) | otterarrayll$layer == 0),]
+hist(expm1(tmp$layer))
+which(tmp$layer == 0)
 
-otterarrayll2 <- sfc_as_cols(otterarrayll, geometry, names = c("x","y"))
-
-
-
-
-library(stars)
 ggplot() +
-  geom_raster(data = otterarrayll2, aes(x=x, y=y, fill = layer)) + #x = x, y = y,
-  #  geom_raster requires the following missing aesthetics: x and y
-  scale_fill_viridis_c() +
-  geom_point(data = locationsll, aes(colour = "otter locations")) + #x = V1, y = V2,
-  geom_sf(data = otterpolyll, colour="red", fill = NA) +
+  geom_sf(data = tmp , aes(colour = layer)) + # otterarrayll # background surface gradient
+  scale_colour_viridis_c() +
+  geom_sf(data = locationsll, colour = "black", size = 1) + # otter points
+  geom_sf(data = otterpolyll, colour="red", fill = NA) + # red polygon outline
   ggtitle("Big Sur Sea Otter Home Range") + xlab("Longitude") + ylab("Latitude")
 
-# > otterarrayll
-# Simple feature collection with 343176 features and 1 field
-# Geometry type: POINT
-# Dimension:     XY
-# Bounding box:  xmin: -121.546 ymin: 35.92165 xmax: -121.4674 ymax: 36.01771
-# Geodetic CRS:  WGS 84
-# First 10 features:
-#   layer                   geometry
-# 1  8.391191e-14  POINT (-121.546 36.01672)
-# 2  1.559140e-13 POINT (-121.5458 36.01672)
-# 3  1.320022e-13 POINT (-121.5456 36.01672)
-# 4  1.102612e-13 POINT (-121.5455 36.01673)
-# 5  9.234535e-14 POINT (-121.5453 36.01673)
-# 6  7.789295e-14 POINT (-121.5451 36.01673)
-# 7  6.644651e-14  POINT (-121.545 36.01673)
-# 8  5.750272e-14 POINT (-121.5448 36.01674)
-# 9  4.322516e-14 POINT (-121.5447 36.01674)
-# 10 1.420815e-14 POINT (-121.5445 36.01674)
+
+
+
 
 
 # gbm.basemap####
