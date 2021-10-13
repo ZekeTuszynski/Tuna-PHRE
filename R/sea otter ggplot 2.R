@@ -128,6 +128,10 @@ ottergeom <- otterarrayll %>%
   sf::st_drop_geometry()
 
 
+
+st_write(ottergeom,
+"./data/Crop_Map.shp", driver = "ESRI Shapefile")
+
 crop_map <- gbm.basemap(grids = ottergeom,
                         gridslat = 1,
                         gridslon = 2)
