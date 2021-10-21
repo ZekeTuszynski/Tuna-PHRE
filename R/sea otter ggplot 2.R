@@ -105,19 +105,10 @@ ggplot() +
   geom_sf(data = otterpolyll, colour = "red", fill = NA) + # red polygon outline
   ggtitle("Big Sur Sea Otter Home Range") + xlab("Longitude") + ylab("Latitude")
 
-
-
-# from here####
-# Add basemap
-
-
-# gbm.basemap####
-library(gbm.auto)
-
 # get lat lons from otterarrayll
 ottergeom <- otterarrayll %>%
-  dplyr::mutate(lat = sf::st_coordinates(.)[,1],
-                lon = sf::st_coordinates(.)[,2]) %>%
+  dplyr::mutate(lat = sf::st_coordinates(.)[,2], # 2021-10-21 lat lon were the wrong way around
+                lon = sf::st_coordinates(.)[,1]) %>%
   dplyr::select(lat, lon) %>%
   sf::st_drop_geometry()
 
@@ -125,59 +116,43 @@ st_write(ottergeom,
          "./data/otterpoints.shp",
          driver = "ESRI Shapefile")
 
+
+# Add basemap
+# gbm.basemap####
+library(gbm.auto)
+# from here####
+dir.create("../basemap")
+# library(rgdal) # if running gbm.basemap locally while fixing it
+# library(maptools)
+# library(raster)
+# library(graphics)
+# library(sf)
+# library(shapefiles)
+# library(rgeos)
 crop_map <- gbm.basemap(grids = ottergeom,
                         gridslat = 1,
                         gridslon = 2,
-                        savedir = "../")
-# although coordinates are longitude/latitude, st_intersection assumes that they are planar
-# Writing layer `Crop_Map' to data source `Crop_Map.shp' using driver `ESRI Shapefile'
-# Writing 0 features with 6 fields and geometry type Unknown (any).
-# Error in `[<-`(`*tmp*`, record, 1, value = readBin(infile, integer(),  :
-#  subscript out of bounds
-# In addition: Warning message: attribute variables are assumed to be spatially constant throughout all geometries
+                        savedir = "../basemap") # "/home/simon/Dropbox/Blocklab Monterey/Internships_Teaching_Recruitment/Zeke Tuszynski/basemap"
+class(crop_map) # list, per gbm.basemap call:
+# cropshp <- read.shapefile(savename) # read it back in with read.shapefile which results in the expected format for draw.shape in mapplots, used in gbm.map # shapefiles::
+# We want it as an sf object for ggplot, so:
+crop_map2 <- st_read(dsn = paste0("../basemap/CroppedMap/Crop_Map.shp"), layer = paste0("Crop_Map"), quiet = TRUE) # read in worldmap
+class(crop_map2) # "sf"         "data.frame"
+# redo map, add basemap
 
-# > traceback()
-# 3: read.shx(paste(shape.name, ".shx", sep = ""))
-# 2: read.shapefile(savename)
+options(scipen = 5) # avoids exponentiated numbers in legend
 
-crop_map <- st_read(dsn = "../GSHHS_shp/CroppedMap/Crop_Map.shp", layer = "../GSHHS_shp/CroppedMap/Crop_Map")
-getwd() # "/home/simon/Dropbox/Blocklab Monterey/Internships_Teaching_Recruitment/Zeke Tuszynski/Tuna-PHRE"
-setwd("/home/simon/Dropbox/Blocklab Monterey/Internships_Teaching_Recruitment/Zeke Tuszynski/GSHHS_shp/CroppedMap/")
-crop_map <- st_read(dsn = "Crop_Map.shp", layer = "Crop_Map") # works. So there's a problem with file referencing above. Fix twice, basemap call & this.
-# Also fix basemap bounds issue.
-# crop_map:
-# Simple feature collection with 0 features and 6 fields
-# Bounding box:  xmin: NA ymin: NA xmax: NA ymax: NA
-# Geodetic CRS:  WGS 84
+# in Lat Lon
+ggplot() +
+  geom_sf(data = otterarrayll , aes(colour = layer)) + # background surface gradient
+  scale_colour_viridis_c() +
+  geom_sf(data = locationsll, colour = "yellow", size = 1) + # otter points
+  geom_sf(data = otterpolyll, colour = "red", fill = NA) + # red polygon outline
+  geom_sf(data = crop_map2, colour = "grey", fill = "grey") + # coastline basemap
+  ggtitle("Big Sur Sea Otter Home Range") + xlab("Longitude") + ylab("Latitude")
 
-setwd("/home/simon/Dropbox/Blocklab Monterey/Internships_Teaching_Recruitment/Zeke Tuszynski/GSHHS_shp/f/")
-world <- st_read(dsn = paste0("GSHHS_f_L1.shp"), layer = paste0("GSHHS_f_L1"), quiet = TRUE) # read in worldmap
-
-grids = ottergeom
-gridslat = 1
-gridslon = 2
-bounds <- c(range(grids[,gridslon]), range(grids[,gridslat])) #still required later despite sf/st update
-xmin = min(grids[,gridslon]) #for sf/st upgrade
-xmax = max(grids[,gridslon])
-ymin = min(grids[,gridslat])
-ymax = max(grids[,gridslat])
-
-sf::sf_use_s2(FALSE) # 2021 addition of s2 code to sf often causes: Error in s2_geography_from_wkb(x, oriented = oriented, check = check):
-# didn't help
-cropshp <- st_crop(world, xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax) # crop to extents
-# although coordinates are longitude/latitude, st_intersection assumes that they are planar
-# Warning message:
-#   attribute variables are assumed to be spatially constant throughout all geometries
-#
-# Simple feature collection with 0 features and 6 fields
-# Bounding box:  xmin: NA ymin: NA xmax: NA ymax: NA
-# Geodetic CRS:  WGS 84
-# [1] id         level      source     parent_id  sibling_id area       geometry
-# <0 rows> (or 0-length row.names)
-# Fails here. Debug, fix in gbm.basemap.
-
-
-setwd("/home/simon/Dropbox/Blocklab Monterey/Internships_Teaching_Recruitment/Zeke Tuszynski/GSHHS_shp/CroppedMap/")
-st_write(cropshp, dsn = "Crop_Map.shp")
-
-
+#To do####
+# Crop basemap extents to otterarrayll extents
+# change legend name from "layer"
+# white background with grey lines (i.e. reverse of current)
+# subtitle explaining red polygon outline, yellow dots, layer gradient
