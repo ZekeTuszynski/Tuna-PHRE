@@ -15,13 +15,17 @@ library(rgdal)
 library(ggplot2)
 library(dplyr)
 library(sf)
-
 library(maptools)
 library(ks)
 library(spex)
 library(rgeos)
 library(stars)
-
+library(magrittr)
+library(tidyverse)
+# Error: package or namespace load failed for ‘tidyverse’ in loadNamespace(j <- i[[1L]], c(lib.loc, .libPaths()), versionCheck = vI[[j]]):
+# there is no package called ‘reprex
+# zeke to fix####
+library(tidylog)
 
 
 ## load data; specify file paths to supporting information
@@ -66,18 +70,18 @@ otterarray_df <- as.data.frame(otterarray, xy = TRUE)
 
 # plain english notes about what every line is doing
 
-
 otterpoly <- st_as_sf(HR$Polygon)
 
-
+# in projected CRS
 ggplot() +
   geom_raster(data = otterarray_df , aes(x = x, y = y, fill = layer)) +
   scale_fill_viridis_c() +
   geom_point(data = locations_df , aes(x = V1, y = V2, colour = "otter locations")) +
-  geom_sf(data = otterpoly[[1]], colour="red", fill = NA) +
+  geom_sf(data = otterpoly[[1]], colour = "red", fill = NA) +
   ggtitle("Big Sur Sea Otter Home Range") + xlab("Longitude") + ylab("Latitude")
 
 
+# Convert to lat lon
 locationsll <- sf::st_as_sf(locations_df, coords = c("V1", "V2"), crs = 3311) %>%
   st_transform(4326)
 
@@ -87,7 +91,9 @@ otterarrayll <- sf::st_as_sf(otterarray_df, coords = c("x", "y"), crs = 3311) %>
 sf::st_crs(otterpoly) <- 3311
 otterpolyll <- sf::st_transform(otterpoly[[1]], 4326)
 
+hist(otterarrayll$layer) # loads of zeroes & NAs
 
+<<<<<<< HEAD
 
 # from here####
 hist(otterarrayll$layer)
@@ -101,20 +107,21 @@ library(magrittr)
 #introduces the %>% operator
 
 tmp <- otterarrayll %>% # start with this object & save changes to it   otterarrayll %<>%
+=======
+otterarrayll %<>% # start with this object & save changes to it   otterarrayll %<>%
+>>>>>>> 90fa68391af753a24394c54bbfbe801180043fd1
   drop_na(layer) %>% # remove NAs
   filter(layer > 0) # remove zeroes
 
-tmp <- otterarrayll[which(!is.na(otterarrayll$layer) | otterarrayll$layer == 0),]
-hist(expm1(tmp$layer))
-which(tmp$layer == 0)
-
+# in Lat Lon
 ggplot() +
-  geom_sf(data = tmp , aes(colour = layer)) + # otterarrayll # background surface gradient
+  geom_sf(data = otterarrayll , aes(colour = layer)) + # background surface gradient
   scale_colour_viridis_c() +
-  geom_sf(data = locationsll, colour = "black", size = 1) + # otter points
-  geom_sf(data = otterpolyll, colour="red", fill = NA) + # red polygon outline
+  geom_sf(data = locationsll, colour = "black", size = 1) # otter points
+  geom_sf(data = otterpolyll, colour = "red", fill = NA) + # red polygon outline
   ggtitle("Big Sur Sea Otter Home Range") + xlab("Longitude") + ylab("Latitude")
 
+<<<<<<< HEAD
 
 
 
@@ -126,21 +133,45 @@ library(shapefiles)
 # get lat lons from otterarrayll
 ottergeom <- otterarrayll %>%
   dplyr::mutate(lat = sf::st_coordinates(.)[,2],
+=======
+# get lat lons from otterarrayll
+ottergeom <- otterarrayll %>%
+  dplyr::mutate(lat = sf::st_coordinates(.)[,2], # 2021-10-21 lat lon were the wrong way around
+>>>>>>> 90fa68391af753a24394c54bbfbe801180043fd1
                 lon = sf::st_coordinates(.)[,1]) %>%
   dplyr::select(lat, lon) %>%
   sf::st_drop_geometry()
 
+<<<<<<< HEAD
 
 st_write(ottergeom,
          "./data/Crop_map.shp", driver = "ESRI Shapefile")
+=======
+st_write(ottergeom,
+         "./data/otterpoints.shp",
+         driver = "ESRI Shapefile")
+>>>>>>> 90fa68391af753a24394c54bbfbe801180043fd1
 
 
+# Add basemap
+# gbm.basemap####
+library(gbm.auto)
+# from here####
+dir.create("../basemap")
+# library(rgdal) # if running gbm.basemap locally while fixing it
+# library(maptools)
+# library(raster)
+# library(graphics)
+# library(sf)
+# library(shapefiles)
+# library(rgeos)
 crop_map <- gbm.basemap(grids = ottergeom,
                         gridslat = 1,
                         gridslon = 2,
+#<<<<<<< HEAD
                         savedir = "C:/Users/zeket/Desktop/Coastline")
 
-#crop_map <- read.shapefile("C:/Users/zeket/Desktop/Coastline/CroppedMap/Crop_Map")
+crop_map <- read.shapefile("C:/Users/zeket/Desktop/Coastline/CroppedMap/Crop_Map")
 
 
 crop_map2 <- readOGR(dsn ="C:/Users/zeket/Desktop/Coastline/CroppedMap/Crop_Map.shp")
@@ -173,3 +204,42 @@ ggplot() +
 # Error in `[<-`(`*tmp*`, record, 1, value = readBin(infile, integer(),  :
 #  subscript out of bounds
 # In addition: Warning message: attribute variables are assumed to be spatially constant throughout all geometrie
+=======
+                        savedir = "../basemap") # "/home/simon/Dropbox/Blocklab Monterey/Internships_Teaching_Recruitment/Zeke Tuszynski/basemap"
+class(crop_map) # list, per gbm.basemap call:
+# cropshp <- read.shapefile(savename) # read it back in with read.shapefile which results in the expected format for draw.shape in mapplots, used in gbm.map # shapefiles::
+# We want it as an sf object for ggplot, so:
+crop_map2 <- st_read(dsn = paste0("../basemap/CroppedMap/Crop_Map.shp"), layer = paste0("Crop_Map"), quiet = TRUE) # read in worldmap
+
+crop_map2 <- st_read(dsn = paste0("C:/Users/zeket/Desktop/Coastline/CroppedMap/Crop_Map.shp"), layer = paste0("Crop_Map"), quiet = TRUE) # read in worldmap
+
+
+
+
+class(crop_map2) # "sf"         "data.frame"
+# redo map, add basemap
+
+options(scipen = 5) # avoids exponentiated numbers in legend
+
+# in Lat Lon
+ggplot() +
+  geom_sf(data = otterarrayll , aes(colour = layer)) + # background surface gradient
+  scale_colour_viridis_c(name = "otter density") +
+  geom_sf(data = locationsll, colour = "yellow", size = 1, show.legend = "point") + # otter points
+  geom_sf(data = otterpolyll, colour = "red", fill = NA, show.legend = "polygon") + # red polygon outline
+  geom_sf(data = crop_map2, colour = "grey", fill = "grey") + # coastline basemap
+  ggtitle("Big Sur Sea Otter Home Range") + xlab("Longitude") + ylab("Latitude") +
+  theme(
+    panel.background = element_rect(fill = "white",
+                                    colour = "white",
+                                    size = 0.5, linetype = "solid"),
+    panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                    colour = "grey"),
+    panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                    colour = "grey"))
+#To do####
+# Crop basemap extents to otterarrayll extents
+# change legend name from "layer"
+# white background with grey lines (i.e. reverse of current)
+# subtitle explaining red polygon outline, yellow dots, layer gradient
+>>>>>>> 90fa68391af753a24394c54bbfbe801180043fd1
