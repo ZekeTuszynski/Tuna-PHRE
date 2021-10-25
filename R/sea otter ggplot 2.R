@@ -96,7 +96,9 @@ library(tidyverse)
 # there is no package called ‘reprex
 # zeke to fix####
 library(tidylog)
+#provides feedback for dplyr functions
 library(magrittr)
+#introduces the %>% operator
 
 tmp <- otterarrayll %>% # start with this object & save changes to it   otterarrayll %<>%
   drop_na(layer) %>% # remove NAs
@@ -120,21 +122,46 @@ ggplot() +
 
 # gbm.basemap####
 library(gbm.auto)
+library(shapefiles)
 # get lat lons from otterarrayll
 ottergeom <- otterarrayll %>%
-  dplyr::mutate(lat = sf::st_coordinates(.)[,1],
-                lon = sf::st_coordinates(.)[,2]) %>%
+  dplyr::mutate(lat = sf::st_coordinates(.)[,2],
+                lon = sf::st_coordinates(.)[,1]) %>%
   dplyr::select(lat, lon) %>%
   sf::st_drop_geometry()
 
 
-
 st_write(ottergeom,
-"./data/Crop_Map.shp", driver = "ESRI Shapefile")
+         "./data/Crop_map.shp", driver = "ESRI Shapefile")
+
 
 crop_map <- gbm.basemap(grids = ottergeom,
                         gridslat = 1,
-                        gridslon = 2)
+                        gridslon = 2,
+                        savedir = "C:/Users/zeket/Desktop/Coastline")
+
+#crop_map <- read.shapefile("C:/Users/zeket/Desktop/Coastline/CroppedMap/Crop_Map")
+
+
+crop_map2 <- readOGR(dsn ="C:/Users/zeket/Desktop/Coastline/CroppedMap/Crop_Map.shp")
+
+coastdatasf <- st_as_sf(crop_map2)
+
+
+#plots just the coastline data
+ggplot() +
+  geom_sf(data = coastdatasf, colour = "black")
+
+#layers coastline data with
+ggplot() +
+  geom_sf(data = tmp , aes(colour = layer)) + # otterarrayll # background surface gradient
+  scale_colour_viridis_c() +
+  geom_sf(data = coastdatasf, colour = "black", fill = "tan") +
+  geom_sf(data = locationsll, colour = "black", size = 1) + # otter points
+  geom_sf(data = otterpolyll, colour="red", fill = NA) + # red polygon outline
+  ggtitle("Big Sur Sea Otter Home Range") + xlab("Longitude") + ylab("Latitude")
+
+
 
 # trying URL 'https://www.ngdc.noaa.gov/mgg/shorelines/data/gshhg/latest/gshhg-shp-2.3.7.zip'
 # Content type 'application/zip' length 149157845 bytes (142.2 MB)
