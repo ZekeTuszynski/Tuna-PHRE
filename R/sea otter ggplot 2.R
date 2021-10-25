@@ -8,8 +8,6 @@
 # Per paper: this is only viable because otters follow the coastline thus can be transformed to a 2D coastline-following reprojection
 # This won't work for tuna. Why not?
 
-
-
 library(raster)
 library(rgdal)
 library(ggplot2)
@@ -93,8 +91,6 @@ otterpolyll <- sf::st_transform(otterpoly[[1]], 4326)
 
 hist(otterarrayll$layer) # loads of zeroes & NAs
 
-<<<<<<< HEAD
-
 # from here####
 hist(otterarrayll$layer)
 library(tidyverse)
@@ -107,9 +103,9 @@ library(magrittr)
 #introduces the %>% operator
 
 tmp <- otterarrayll %>% # start with this object & save changes to it   otterarrayll %<>%
-=======
-otterarrayll %<>% # start with this object & save changes to it   otterarrayll %<>%
->>>>>>> 90fa68391af753a24394c54bbfbe801180043fd1
+
+  otterarrayll %<>% # start with this object & save changes to it   otterarrayll %<>%
+
   drop_na(layer) %>% # remove NAs
   filter(layer > 0) # remove zeroes
 
@@ -117,11 +113,11 @@ otterarrayll %<>% # start with this object & save changes to it   otterarrayll %
 ggplot() +
   geom_sf(data = otterarrayll , aes(colour = layer)) + # background surface gradient
   scale_colour_viridis_c() +
-  geom_sf(data = locationsll, colour = "black", size = 1) # otter points
+  geom_sf(data = locationsll, colour = "black", size = 1) + # otter points
   geom_sf(data = otterpolyll, colour = "red", fill = NA) + # red polygon outline
   ggtitle("Big Sur Sea Otter Home Range") + xlab("Longitude") + ylab("Latitude")
 
-<<<<<<< HEAD
+
 
 
 
@@ -130,27 +126,21 @@ ggplot() +
 # gbm.basemap####
 library(gbm.auto)
 library(shapefiles)
-# get lat lons from otterarrayll
-ottergeom <- otterarrayll %>%
-  dplyr::mutate(lat = sf::st_coordinates(.)[,2],
-=======
+
 # get lat lons from otterarrayll
 ottergeom <- otterarrayll %>%
   dplyr::mutate(lat = sf::st_coordinates(.)[,2], # 2021-10-21 lat lon were the wrong way around
->>>>>>> 90fa68391af753a24394c54bbfbe801180043fd1
                 lon = sf::st_coordinates(.)[,1]) %>%
   dplyr::select(lat, lon) %>%
   sf::st_drop_geometry()
 
-<<<<<<< HEAD
 
 st_write(ottergeom,
          "./data/Crop_map.shp", driver = "ESRI Shapefile")
-=======
+
 st_write(ottergeom,
          "./data/otterpoints.shp",
          driver = "ESRI Shapefile")
->>>>>>> 90fa68391af753a24394c54bbfbe801180043fd1
 
 
 # Add basemap
@@ -168,13 +158,13 @@ dir.create("../basemap")
 crop_map <- gbm.basemap(grids = ottergeom,
                         gridslat = 1,
                         gridslon = 2,
-#<<<<<<< HEAD
+                        res = f,
                         savedir = "C:/Users/zeket/Desktop/Coastline")
+# Zeke to try, see if this solves the overlapping coastline issue.
 
 crop_map <- read.shapefile("C:/Users/zeket/Desktop/Coastline/CroppedMap/Crop_Map")
-
-
-crop_map2 <- readOGR(dsn ="C:/Users/zeket/Desktop/Coastline/CroppedMap/Crop_Map.shp")
+crop_map2 <- readOGR(dsn = "C:/Users/zeket/Desktop/Coastline/CroppedMap/Crop_Map.shp")
+# use relative references not local ####
 
 coastdatasf <- st_as_sf(crop_map2)
 
@@ -189,7 +179,7 @@ ggplot() +
   scale_colour_viridis_c() +
   geom_sf(data = coastdatasf, colour = "black", fill = "tan") +
   geom_sf(data = locationsll, colour = "black", size = 1) + # otter points
-  geom_sf(data = otterpolyll, colour="red", fill = NA) + # red polygon outline
+  geom_sf(data = otterpolyll, colour = "red", fill = NA) + # red polygon outline
   ggtitle("Big Sur Sea Otter Home Range") + xlab("Longitude") + ylab("Latitude")
 
 
@@ -204,8 +194,8 @@ ggplot() +
 # Error in `[<-`(`*tmp*`, record, 1, value = readBin(infile, integer(),  :
 #  subscript out of bounds
 # In addition: Warning message: attribute variables are assumed to be spatially constant throughout all geometrie
-=======
-                        savedir = "../basemap") # "/home/simon/Dropbox/Blocklab Monterey/Internships_Teaching_Recruitment/Zeke Tuszynski/basemap"
+
+# savedir = "../basemap") # "/home/simon/Dropbox/Blocklab Monterey/Internships_Teaching_Recruitment/Zeke Tuszynski/basemap"
 class(crop_map) # list, per gbm.basemap call:
 # cropshp <- read.shapefile(savename) # read it back in with read.shapefile which results in the expected format for draw.shape in mapplots, used in gbm.map # shapefiles::
 # We want it as an sf object for ggplot, so:
@@ -221,25 +211,47 @@ class(crop_map2) # "sf"         "data.frame"
 
 options(scipen = 5) # avoids exponentiated numbers in legend
 
+# Crop basemap extents to otterarrayll extents
+crop_map3 <- st_crop(crop_map2, st_bbox(otterarrayll))
+
 # in Lat Lon
 ggplot() +
-  geom_sf(data = otterarrayll , aes(colour = layer)) + # background surface gradient
-  scale_colour_viridis_c(name = "otter density") +
+  # geom_sf(data = otterarrayll , aes(colour = layer)) + # background surface gradient
+  # scale_colour_viridis_c(name = "otter density") +
+  geom_sf(data = crop_map3, colour = "grey", fill = "grey") + # coastline basemap
   geom_sf(data = locationsll, colour = "yellow", size = 1, show.legend = "point") + # otter points
-  geom_sf(data = otterpolyll, colour = "red", fill = NA, show.legend = "polygon") + # red polygon outline
-  geom_sf(data = crop_map2, colour = "grey", fill = "grey") + # coastline basemap
-  ggtitle("Big Sur Sea Otter Home Range") + xlab("Longitude") + ylab("Latitude") +
-  theme(
-    panel.background = element_rect(fill = "white",
-                                    colour = "white",
-                                    size = 0.5, linetype = "solid"),
-    panel.grid.major = element_line(size = 0.5, linetype = 'solid',
-                                    colour = "grey"),
-    panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
-                                    colour = "grey"))
+  geom_sf(data = otterpolyll, colour = "red", fill = NA, show.legend = "polygon") + # red polygon outline # "red"
+  scale_colour_manual("red") +
+  ggtitle("Big Sur Sea Otter Home Range",
+          # subtitle explaining red polygon outline, yellow dots, layer gradient
+          subtitle = "whatever") +
+  xlab("Longitude") +
+  ylab("Latitude") +
+  theme(panel.background = element_rect(fill = "white",
+                                        colour = "white",
+                                        size = 0.5, linetype = "solid"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "grey"),
+        panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                        colour = "grey"))
 #To do####
-# Crop basemap extents to otterarrayll extents
+
 # change legend name from "layer"
+names(otterpolyll) <- "redpoly"
+names(otterpolyll)[1] <- "redpoly"
+
 # white background with grey lines (i.e. reverse of current)
-# subtitle explaining red polygon outline, yellow dots, layer gradient
->>>>>>> 90fa68391af753a24394c54bbfbe801180043fd1
+## Zeke need to remove dark grey bit of ocean: remove NAs from otterarrayll (before plot)
+class(otterarrayll) # "data.frame"
+
+
+# legend: add red polygon outline, yellow dots
+## SD have done this before where??
+
+# scale values to 0:1. Could be an option.
+if (scalemax) x <- x / max(x, na.rm = TRUE)
+# 50 % 95% KUD contours typical
+
+## SD: basemap & coastline not aligned perfectly, why?
+# set res to F
+
