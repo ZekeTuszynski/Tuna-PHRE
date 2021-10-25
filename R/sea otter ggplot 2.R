@@ -152,7 +152,7 @@ coastdatasf <- st_as_sf(crop_map2)
 ggplot() +
   geom_sf(data = coastdatasf, colour = "black")
 
-#layers coastline data with
+#layers coastline data with PHRE map
 ggplot() +
   geom_sf(data = tmp , aes(colour = layer)) + # otterarrayll # background surface gradient
   scale_colour_viridis_c() +
