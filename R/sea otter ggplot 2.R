@@ -145,6 +145,8 @@ st_write(ottergeom,
 
 # Add basemap
 # gbm.basemap####
+library(devtools)
+install_github("SimonDedman/gbm.auto")
 library(gbm.auto)
 # from here####
 dir.create("../basemap")
@@ -158,8 +160,10 @@ dir.create("../basemap")
 crop_map <- gbm.basemap(grids = ottergeom,
                         gridslat = 1,
                         gridslon = 2,
-                        res = f,
-                        savedir = "C:/Users/zeket/Desktop/Coastline")
+                        res = "f",
+                        getzip = "../basemap/GSHHS_shp",
+                        savedir = "../basemap/",
+                        returnsf = TRUE)
 # Zeke to try, see if this solves the overlapping coastline issue.
 
 crop_map <- read.shapefile("C:/Users/zeket/Desktop/Coastline/CroppedMap/Crop_Map")
@@ -167,7 +171,6 @@ crop_map2 <- readOGR(dsn = "C:/Users/zeket/Desktop/Coastline/CroppedMap/Crop_Map
 # use relative references not local ####
 
 coastdatasf <- st_as_sf(crop_map2)
-
 
 #plots just the coastline data
 ggplot() +
@@ -184,30 +187,12 @@ ggplot() +
 
 
 
-# trying URL 'https://www.ngdc.noaa.gov/mgg/shorelines/data/gshhg/latest/gshhg-shp-2.3.7.zip'
-# Content type 'application/zip' length 149157845 bytes (142.2 MB)
-# downloaded 142.2 MB
-#
-# although coordinates are longitude/latitude, st_intersection assumes that they are planar
-# Writing layer `Crop_Map' to data source `Crop_Map.shp' using driver `ESRI Shapefile'
-# Writing 0 features with 6 fields and geometry type Unknown (any).
-# Error in `[<-`(`*tmp*`, record, 1, value = readBin(infile, integer(),  :
-#  subscript out of bounds
-# In addition: Warning message: attribute variables are assumed to be spatially constant throughout all geometrie
-
 # savedir = "../basemap") # "/home/simon/Dropbox/Blocklab Monterey/Internships_Teaching_Recruitment/Zeke Tuszynski/basemap"
 class(crop_map) # list, per gbm.basemap call:
 # cropshp <- read.shapefile(savename) # read it back in with read.shapefile which results in the expected format for draw.shape in mapplots, used in gbm.map # shapefiles::
 # We want it as an sf object for ggplot, so:
 crop_map2 <- st_read(dsn = paste0("../basemap/CroppedMap/Crop_Map.shp"), layer = paste0("Crop_Map"), quiet = TRUE) # read in worldmap
-
 crop_map2 <- st_read(dsn = paste0("C:/Users/zeket/Desktop/Coastline/CroppedMap/Crop_Map.shp"), layer = paste0("Crop_Map"), quiet = TRUE) # read in worldmap
-
-
-
-
-class(crop_map2) # "sf"         "data.frame"
-# redo map, add basemap
 
 options(scipen = 5) # avoids exponentiated numbers in legend
 
@@ -253,5 +238,5 @@ if (scalemax) x <- x / max(x, na.rm = TRUE)
 # 50 % 95% KUD contours typical
 
 ## SD: basemap & coastline not aligned perfectly, why?
-# set res to F
+# set res to F. Already is.
 
