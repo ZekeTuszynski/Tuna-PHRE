@@ -66,6 +66,10 @@ summary(otterarray)
 summary(otterarray, maxamp = ncell(otterarray))
 otterarray_df <- as.data.frame(otterarray, xy = TRUE)
 
+# remove zeroes and NA's from otterarray
+#otterarray_df <- subset(otterarray_df, otterarray_df$layer > 0 )
+otterarray_df <- subset(otterarray_df, is.na(otterarray_df$layer) == FALSE )
+
 # plain english notes about what every line is doing
 
 otterpoly <- st_as_sf(HR$Polygon)
@@ -108,6 +112,7 @@ tmp <- otterarrayll %>% # start with this object & save changes to it   otterarr
 
   drop_na(layer) %>% # remove NAs
   filter(layer > 0) # remove zeroes
+
 
 # in Lat Lon
 ggplot() +
@@ -201,12 +206,21 @@ crop_map3 <- st_crop(crop_map2, st_bbox(otterarrayll))
 
 # in Lat Lon
 ggplot() +
-  # geom_sf(data = otterarrayll , aes(colour = layer)) + # background surface gradient
-  # scale_colour_viridis_c(name = "otter density") +
+  geom_sf(data = otterarrayll , aes(colour = layer)) + # background surface gradient
+  scale_colour_viridis_c(name = "otter density") +
+
   geom_sf(data = crop_map3, colour = "grey", fill = "grey") + # coastline basemap
-  geom_sf(data = locationsll, colour = "yellow", size = 1, show.legend = "point") + # otter points
-  geom_sf(data = otterpolyll, colour = "red", fill = NA, show.legend = "polygon") + # red polygon outline # "red"
-  scale_colour_manual("red") +
+
+
+  geom_sf(data = locationsll, aes(colour = "sightings"), show.legend = "point") +
+
+  geom_sf(data = otterpolyll, aes(colour = "range"), alpha = 0, show.legend = "polygon") + # red polygon outline # "red"
+
+  scale_colour_manual("", values = c("red", "green")) +
+
+  #script stops working at this point - Error: Discrete value supplied to continuous scale####
+
+
   ggtitle("Big Sur Sea Otter Home Range",
           # subtitle explaining red polygon outline, yellow dots, layer gradient
           subtitle = "whatever") +
